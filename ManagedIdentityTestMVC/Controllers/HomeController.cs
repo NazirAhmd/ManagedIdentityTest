@@ -2,7 +2,9 @@
 using Azure.Identity;
 using ManagedIdentityTestMVC.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using System.Diagnostics;
+using static System.Net.WebRequestMethods;
 
 namespace ManagedIdentityTestMVC.Controllers
 {
@@ -41,6 +43,11 @@ namespace ManagedIdentityTestMVC.Controllers
                 // To print the token, you can convert it to string 
                 var accessTokenString = accessToken.Token.ToString();
                 ViewBag.AccessToken = accessTokenString;
+
+                var cosmosUrl = @"https://cosmos-eus-test.documents.azure.com:443/";
+                var options = new CosmosClientOptions() { ConnectionMode = ConnectionMode.Gateway };
+                var client = new CosmosClient(cosmosUrl, credential, options);
+                var res = client.CreateDatabaseIfNotExistsAsync("Office").GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
