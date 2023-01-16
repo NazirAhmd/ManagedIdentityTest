@@ -24,7 +24,9 @@ namespace ManagedIdentityTestMVC.Controllers
 
         public IActionResult Privacy()
         {
-            GetAccessToken();
+            var userAssignedMI = "6d6870f0-dc65-49d6-aadc-7c219c889e8f";
+            ViewBag.AccessToken1 = GetAccessToken(userAssignedMI);
+            ViewBag.AccessToken2 = GetAccessToken();
             return View();
         }
 
@@ -34,26 +36,27 @@ namespace ManagedIdentityTestMVC.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        private void GetAccessToken()
+        private string GetAccessToken(string clientId = "")
         {
             try
             {
-                var credential = new ManagedIdentityCredential();
+                var credential = string.IsNullOrEmpty(clientId) ? new ManagedIdentityCredential() : new ManagedIdentityCredential(clientId);
                 var accessToken = credential.GetToken(new TokenRequestContext(new[] { "https://cosmos.documents.azure.com//.default" }));
                 // To print the token, you can convert it to string 
                 var accessTokenString = accessToken.Token.ToString();
-                ViewBag.AccessToken = accessTokenString;
 
                 var cosmosUrl = @"https://cosmos-eus-test.documents.azure.com:443/";
                 var options = new CosmosClientOptions() { ConnectionMode = ConnectionMode.Gateway };
                 var client = new CosmosClient(cosmosUrl, credential, options);
-                var res = client.CreateDatabaseIfNotExistsAsync("Office").GetAwaiter().GetResult();
+                var res = client.GetDatabase("Office");
+                return accessTokenString;
             }
             catch (Exception ex)
             {
                 var error = "Error: " + ex.Message.ToString();
                 ViewBag.Error = error;
             }
+            return "No token";
         }
     }
 }
