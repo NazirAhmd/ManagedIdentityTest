@@ -11,6 +11,8 @@ namespace ManagedIdentityTestMVC.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IList<string> _errors = new List<string>();
+        private readonly IList<string> _cosmosDatabases = new List<string>();
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -25,8 +27,12 @@ namespace ManagedIdentityTestMVC.Controllers
         public IActionResult Privacy()
         {
             var userAssignedMI = "6d6870f0-dc65-49d6-aadc-7c219c889e8f";
+            var registeredAppId = "c6240593-1709-450d-b8bd-c721567327c7";
             ViewBag.AccessToken1 = GetAccessToken(userAssignedMI);
             ViewBag.AccessToken2 = GetAccessToken();
+            ViewBag.AccessToken3 = GetAccessToken(registeredAppId);
+            ViewBag.Error = string.Join("------ERROR---------", _errors);
+            ViewBag.Databases = string.Join("------DB---------", _cosmosDatabases); ;
             return View();
         }
 
@@ -48,13 +54,13 @@ namespace ManagedIdentityTestMVC.Controllers
                 var cosmosUrl = @"https://cosmos-eus-test.documents.azure.com:443/";
                 var options = new CosmosClientOptions() { ConnectionMode = ConnectionMode.Gateway };
                 var client = new CosmosClient(cosmosUrl, credential, options);
-                var res = client.GetDatabase("Office");
+                Database res = client.GetDatabase("Office").GetContainer("Employee").Database;
+                _cosmosDatabases.Add(res.Id);
                 return accessTokenString;
             }
             catch (Exception ex)
             {
-                var error = "Error: " + ex.Message.ToString();
-                ViewBag.Error = error;
+                _errors.Add(ex.Message);
             }
             return "No token";
         }
