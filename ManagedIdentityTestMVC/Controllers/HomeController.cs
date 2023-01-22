@@ -3,13 +3,15 @@ using Azure.Identity;
 using ManagedIdentityTestMVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Identity.Client;
 using System.Diagnostics;
-using static System.Net.WebRequestMethods;
 
 namespace ManagedIdentityTestMVC.Controllers
 {
     public class HomeController : Controller
     {
+        private const string TenantId = "b1914422-c6d8-4aec-b71b-3aa233f6165e";
+        private const string AzureADAuthority = "https://login.microsoftonline.com/" + TenantId;
         private readonly ILogger<HomeController> _logger;
         private readonly IList<string> _errors = new List<string>();
         private readonly IList<string> _cosmosDatabases = new List<string>();
@@ -27,10 +29,11 @@ namespace ManagedIdentityTestMVC.Controllers
         public IActionResult Privacy()
         {
             var userAssignedMI = "6d6870f0-dc65-49d6-aadc-7c219c889e8f";
-            var registeredAppId = "c6240593-1709-450d-b8bd-c721567327c7";
+            var clientId = "c6240593-1709-450d-b8bd-c721567327c7";
+            var clientSecret = "4S88Q~jTCuPhCxyWMai8Ei~.L3Q89Xf1crw1RagS";
             ViewBag.AccessToken1 = GetAccessToken(userAssignedMI);
             ViewBag.AccessToken2 = GetAccessToken();
-            ViewBag.AccessToken3 = GetAccessToken(registeredAppId);
+            ViewBag.AccessToken3 = GetAccessTokenForMicrosoftGraphUsingClientCredFlow(clientId, clientSecret);
             ViewBag.Error = string.Join("------ERROR---------", _errors);
             ViewBag.Databases = string.Join("------DB---------", _cosmosDatabases); ;
             return View();
@@ -48,8 +51,7 @@ namespace ManagedIdentityTestMVC.Controllers
             {
                 var credential = string.IsNullOrEmpty(clientId) ? new ManagedIdentityCredential() : new ManagedIdentityCredential(clientId);
                 var accessToken = credential.GetToken(new TokenRequestContext(new[] { "https://cosmos.documents.azure.com//.default" }));
-                // To print the token, you can convert it to string 
-                var accessTokenString = accessToken.Token.ToString();
+                var accessTokenString = accessToken.Token;
 
                 var cosmosUrl = @"https://cosmos-eus-test.documents.azure.com:443/";
                 var options = new CosmosClientOptions() { ConnectionMode = ConnectionMode.Gateway };
@@ -63,6 +65,22 @@ namespace ManagedIdentityTestMVC.Controllers
                 _errors.Add(ex.Message);
             }
             return "No token";
+        }
+
+        //OAuth 2.0 Client Credentials flow
+        private string? GetAccessTokenForMicrosoftGraphUsingClientCredFlow(string clientId, string clientSecret)
+        {
+            var confidentialClientApp = ConfidentialClientApplicationBuilder.Create(clientId)
+                .WithAuthority(AzureADAuthority)
+                .WithClientSecret(clientSecret)
+                .WithRedirectUri("https://localhost")
+                .WithLegacyCacheCompatibility(false).WithCacheOptions(CacheOptions.EnableSharedCacheOptions).Build();
+
+            string resource = "https://graph.microsoft.com";
+            string[] scopes = { $"{resource}/.default" };
+
+            var result = confidentialClientApp.AcquireTokenForClient(scopes).ExecuteAsync().Result;
+            return result?.AccessToken;
         }
     }
 }
