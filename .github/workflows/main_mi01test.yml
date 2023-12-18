@@ -34,6 +34,9 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
+      - name: use custom Action
+        uses: nazir1993/action-using-template@v1
+
   deploy:
     runs-on: windows-latest
     needs: build
