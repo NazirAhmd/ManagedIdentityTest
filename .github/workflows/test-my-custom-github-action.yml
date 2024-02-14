@@ -1,0 +1,16 @@
+name: Test my custom GitHub Action
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: use custom Action
+        uses: NazirAhmd/TEST-GITHUB-ACTION@v1
+        with:
+          milliseconds: '5000'
