@@ -11,6 +11,11 @@ jobs:
 
     steps:
       - name: use custom Action
-        uses: NazirAhmd/TEST-GITHUB-ACTION@v1
+        uses: NazirAhmd/TEST-GITHUB-ACTION@v2
         with:
-          milliseconds: '5000'
+          appId: '29b335c9-08a9-4b5a-af0f-15271edddade'
+          appSecret: ${{ secrets.TO_ACCESS_AAD_KV }}
+          keyVaultName: 'kv-github-action'
+          tenantId: 'b1914422-c6d8-4aec-b71b-3aa233f6165e'
+          secretName: 'dummy-secret'
+          
