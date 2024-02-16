@@ -1,0 +1,40 @@
+name: Test GitHub Action With Federated Credentials
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: OIDC Login to Azure Public Cloud with AzPowershell (enableAzPSSession true)
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.GA_AAD_APPID }}
+          tenant-id: ${{ secrets.GA_TENANTID }}
+          subscription-id: ${{ secrets.GA_SUBSCRIPTION_ID }} 
+          enable-AzPSSession: true
+          
+      - name: 'Get resource group with PowerShell action'
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            Get-AzResourceGroup
+          azPSVersion: "latest"
+          
+      - name: use custom Action
+        uses: NazirAhmd/TEST-GITHUB-ACTION@v2
+        with:
+          appId: ${{ secrets.GA_AAD_APPID }}
+          appSecret: ${{ secrets.GA_APP_SECRET }}
+          keyVaultName: 'kv-github-action'
+          tenantId: ${{ secrets.GA_TENANTID }}
+          secretName: 'dummy-secret'
+          
