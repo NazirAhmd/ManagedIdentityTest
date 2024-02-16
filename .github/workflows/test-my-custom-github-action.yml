@@ -13,9 +13,9 @@ jobs:
       - name: use custom Action
         uses: NazirAhmd/TEST-GITHUB-ACTION@v2
         with:
-          appId: '29b335c9-08a9-4b5a-af0f-15271edddade'
-          appSecret: ${{ secrets.TO_ACCESS_AAD_KV }}
+          appId: ${{ secrets.GA_AAD_APPID }}
+          appSecret: ${{ secrets.GA_APP_SECRET }}
           keyVaultName: 'kv-github-action'
-          tenantId: 'b1914422-c6d8-4aec-b71b-3aa233f6165e'
+          tenantId: ${{ secrets.GA_TENANTID }}
           secretName: 'dummy-secret'
           
