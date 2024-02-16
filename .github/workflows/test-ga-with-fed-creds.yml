@@ -19,7 +19,7 @@ jobs:
         with:
           client-id: ${{ secrets.GA_AAD_APPID }}
           tenant-id: ${{ secrets.GA_TENANTID }}
-          subscription-id: ${{ secrets.GA_SUBSCRIPTION_ID }} 
+          subscription-id: '519510fb-0bf9-4f36-af25-650e475f54bd' 
           enable-AzPSSession: true
           
       - name: 'Get resource group with PowerShell action'
