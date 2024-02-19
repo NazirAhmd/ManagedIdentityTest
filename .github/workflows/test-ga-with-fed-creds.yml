@@ -28,7 +28,14 @@ jobs:
           inlineScript: |
             Get-AzResourceGroup
           azPSVersion: "latest"
-          
+      
+      - name: Retrieve secret from AKV
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            secretValue=$(az keyvault secret show --name "dummy-secret" --vault-name "kv-github-action" --query "value")
+            echo "SECRETVALUE="$secretValue >> $GITHUB_ENV
+            
       - name: use custom Action
         uses: NazirAhmd/TEST-GITHUB-ACTION@v2
         with:
