@@ -22,27 +22,20 @@ jobs:
           subscription-id: '519510fb-0bf9-4f36-af25-650e475f54bd' 
           enable-AzPSSession: true
           
-      - name: 'Get resource group with PowerShell action'
+      - name: 'Get App Secret from AKV with PowerShell action'
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            Get-AzResourceGroup
-            $secret = Get-AzKeyVaultSecret -VaultName "kv-github-action" -Name "dummy-secret" -AsPlainText
+            $secret = Get-AzKeyVaultSecret -VaultName "kv-github-action" -Name "access-from-github-action" -AsPlainText
+            echo "APP_SECRET="$secret >> $GITHUB_ENV
             echo $secret
           azPSVersion: "latest"
-      
-      - name: Retrieve secret from AKV
-        uses: azure/CLI@v1
-        with:
-          inlineScript: |
-            secretValue=$(az keyvault secret show --name "dummy-secret" --vault-name "kv-github-action" --query "value")
-            echo "SECRETVALUE="$secretValue >> $GITHUB_ENV
             
-      - name: use custom Action
+      - name: use custom GitHub Action
         uses: NazirAhmd/TEST-GITHUB-ACTION@v2
         with:
           appId: ${{ secrets.GA_AAD_APPID }}
-          appSecret: ${{ secrets.GA_APP_SECRET }}
+          appSecret: ${{ env.APP_SECRET }}
           keyVaultName: 'kv-github-action'
           tenantId: ${{ secrets.GA_TENANTID }}
           secretName: 'dummy-secret'
