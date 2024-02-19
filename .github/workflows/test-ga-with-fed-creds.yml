@@ -27,6 +27,7 @@ jobs:
         with:
           inlineScript: |
             Get-AzResourceGroup
+            $secret = Get-AzKeyVaultSecret -VaultName "kv-github-action" -Name "dummy-secret" -AsPlainText
           azPSVersion: "latest"
       
       - name: Retrieve secret from AKV
