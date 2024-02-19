@@ -1,0 +1,43 @@
+name: Test GitHub Action With Federated Credentials in AME
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: OIDC Login to Azure Public Cloud with AzPowershell (enableAzPSSession true)
+        uses: azure/login@v1
+        with:
+          client-id: '29b335c9-08a9-4b5a-af0f-15271edddade'
+          tenant-id: 'b1914422-c6d8-4aec-b71b-3aa233f6165e'
+          subscription-id: '519510fb-0bf9-4f36-af25-650e475f54bd' 
+          enable-AzPSSession: true
+          
+      - name: 'Get App Secret from AKV with PowerShell action'
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            $secret = Get-AzKeyVaultSecret -VaultName "kv-github-action" -Name "access-from-github-action" -AsPlainText
+            echo "APP_SECRET="$secret >> $GITHUB_ENV
+            echo $secret
+          azPSVersion: "latest"
+            
+      - name: use custom GitHub Action
+        uses: NazirAhmd/TEST-GITHUB-ACTION@v2
+        with:
+          appId: ${{ secrets.GA_AAD_APPID }}
+          appSecret: ${{ env.APP_SECRET }}
+          keyVaultName: 'kv-github-action'
+          tenantId: ${{ secrets.GA_TENANTID }}
+          secretName: 'dummy-secret'
+          
