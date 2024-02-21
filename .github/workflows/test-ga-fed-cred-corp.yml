@@ -1,0 +1,21 @@
+name: Test GitHub Action With Federated Credentials in CORP
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: OIDC Login to Azure Public Cloud with AzPowershell (enableAzPSSession true)
+        uses: azure/login@v1
+        with:
+          client-id: '1c41c1f0-3cc3-4451-838e-88b0cd1b033e'
+          tenant-id: '72f988bf-86f1-41af-91ab-2d7cd011db47'
+          subscription-id: '0cd6095b-b140-41ec-ad1d-32f2f7493386' 
+          enable-AzPSSession: true
