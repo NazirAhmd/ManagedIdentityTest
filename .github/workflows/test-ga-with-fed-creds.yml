@@ -21,7 +21,7 @@ jobs:
           enable-AzPSSession: true
             
       - name: use custom GitHub Action
-        uses: NazirAhmd/TEST-GITHUB-ACTION@v2
+        uses: NazirAhmd/TEST-GITHUB-ACTION@v3
         with:
           appId: ${{ secrets.GA_AAD_APPID }}
           keyVaultName: 'kv-github-action'
